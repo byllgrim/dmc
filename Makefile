@@ -1,5 +1,13 @@
-dmc: dmc.o
-	cc -o dmc dmc.o
+CC = cc
+CFLAGS = -Os -pedantic -s -static -std=c89 -Wall -Wextra
 
-dmc.o: dmc.c
-	cc -c dmc.c
+OBJ = dmc.o #TODO
+
+dmc: ${OBJ}
+	cc ${CFLAGS} -o dmc ${OBJ}
+
+.c.o:
+	${CC} ${CFLAGS} -c $<
+
+clean:
+	rm -f dmc ${OBJ}
