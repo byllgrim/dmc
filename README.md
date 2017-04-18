@@ -17,12 +17,37 @@ It is only meant to launch programs.
 Scripting can be done in proper scripting languages, not the shell.
 I will do my best to separate each functionality out of this program.
 
+Syntax
+------
+```
+%token WORD
+%token NUMBER
+
+%start sequence
+%%
+sequence    : command
+            | command '&'
+            | command pipe sequence
+            ;
+pipe        : '|'
+            | '|' redirection
+            ;
+redirection : '[' NUMBER ']'
+            | '[' NUMBER '=' NUMBER ']'
+            ;
+command     : WORD
+            | WORD suffix
+            ;
+suffix      : WORD
+            | WORD suffix
+            ; /* TODO rule is superfluous? */
+```
+
 To be considered
 ----------------
 Looking for stuff to throw in the bin:
 
 * Redirection
-* Pipes
 * Line editing
 * History
 * Job control
@@ -51,3 +76,4 @@ Looking for stuff to throw in the bin:
   - if conditional
 
 http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+http://doc.cat-v.org/plan_9/4th_edition/papers/rc
