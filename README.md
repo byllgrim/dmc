@@ -1,19 +1,16 @@
-dmc
-========
-Command-line user interface
-
+dmc - command-line user interface
+=================================
 Run dmc, it's not so tricky.
 
 The name is an acronym for dynamic manual commands.
-Just kidding! It's a misspelling of cmd.
+Just kidding! It's a misspelling of cmd™®©.
 
 Goal
 --------
 Support a bare minimum subset of sh interactive mode.
-Redirection, builtins, etc should be separate programs where possible.
 
 dmc is only meant to launch programs.
-I will do my best to separate each functionality out of this program.
+Redirection, builtins, etc should be separate programs wherever possible.
 
     ∃ scriptlang | scriptlang ∪ shell = ∅
 
@@ -76,4 +73,5 @@ Looking for stuff to throw in the bin:
   - if conditional
 
 http://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html
+
 http://doc.cat-v.org/plan_9/4th_edition/papers/rc
