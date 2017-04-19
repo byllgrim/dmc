@@ -14,7 +14,7 @@ Redirection, builtins, etc should be separate programs wherever possible.
 
     ∃ scriptlang | scriptlang ∪ shell = ∅
 
-Syntax
+Grammar
 --------
 ```
 %token WORD
@@ -22,9 +22,12 @@ Syntax
 
 %start sequence
 %%
-sequence    : command
-            | command '&'
-            | command pipe sequence
+sequence    : cmd_words
+            | cmd_words '&'
+            | cmd_words pipe sequence
+            ;
+cmd_words   : WORD
+            | WORD cmd_words
             ;
 pipe        : '|'
             | '|' redirection
@@ -32,12 +35,6 @@ pipe        : '|'
 redirection : '[' NUMBER ']'
             | '[' NUMBER '=' NUMBER ']'
             ;
-command     : WORD
-            | WORD suffix
-            ;
-suffix      : WORD
-            | WORD suffix
-            ; /* TODO rule is superfluous? */
 ```
 
 To be considered
