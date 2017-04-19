@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -Os -pedantic -s -static -std=c89 -Wall -Wextra
 
-OBJ = dmc.o #TODO
+OBJ = dmc.o util.o #TODO
 
 dmc: ${OBJ}
 	cc ${CFLAGS} -o dmc ${OBJ}
