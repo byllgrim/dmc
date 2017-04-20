@@ -44,6 +44,7 @@ eot_token(struct token *t, char *s)
 {
 	t->type = EOT;
 	t->text = (void *)0;
+printf("eot_token\n");
 	return s;
 }
 
@@ -82,6 +83,13 @@ printf("char_token '%c'\n", s[0]); /* TODO remove */
 	return s + 2;
 }
 
+int
+valid_char(char c)
+{
+	return c == '&' || c == '|' || c == '='
+	       || c == '[' || c == ']';
+}
+
 char *
 get_token(struct token *t, char *s)
 {
@@ -92,10 +100,10 @@ get_token(struct token *t, char *s)
 		return eot_token(t, s);
 	else if (isdigit(s[0]))
 		return number_token(t, s);
-	else if (isalpha(s[0]))
-		return word_token(t, s);
-	else
+	else if (valid_char(s[0]))
 		return char_token(t, s); /* TODO explicit and first */
+	else
+		return word_token(t, s);
 }
 
 struct tree_node *
@@ -120,7 +128,7 @@ copy_token(struct token *t)
 	return new;
 }
 
-void
+char *
 match(int expected, struct token *t, char *s)
 {
 	if (t->type == expected)
@@ -129,6 +137,7 @@ match(int expected, struct token *t, char *s)
 		die("match: unexpected token '%s'\n", t->text);
 
 	/* TODO the advancement of get_token is a side-effect */
+	return s;
 }
 
 struct tree_node *
@@ -137,7 +146,7 @@ cmd_words(struct token *t, char *s)
 	struct tree_node *n = new_node();
 
 	n->t = copy_token(t);
-	match(WORD, t, s);
+	s = match(WORD, t, s);
 
 	if (t->type == WORD) {
 		n->child[0] = cmd_words(t, s); /* TODO advance s */
@@ -155,7 +164,7 @@ sequence(struct token *t, char *s)
 
 	if (t->type == '&') {
 		n->t = copy_token(t); /* TODO asynchronous bg job */
-		match('&', t, s);
+		s = match('&', t, s);
 	} else if (t->type == '|') {
 		/*
 		TODO
