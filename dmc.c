@@ -39,25 +39,25 @@ get_input(char *s, size_t len)
 	return s;
 }
 
-size_t
-eot_token(struct token *t)
+char *
+eot_token(struct token *t, char *s)
 {
 	t->type = EOT;
 	t->text = (void *)0;
-	return 0;
+	return s;
 }
 
-size_t
+char *
 number_token(struct token *t, char *s)
 {
 	(void)t; /* TODO */
 	(void)s; /* TODO */
 
 printf("number_token TODO\n"); /* TODO remove */
-	return 0; /* TODO */
+	return s; /* TODO */
 }
 
-size_t
+char *
 word_token(struct token *t, char *s)
 {
 	int i;
@@ -65,30 +65,31 @@ word_token(struct token *t, char *s)
 	for (i = 0; s[i] && !isspace(s[i]); i++)
 		; /* TODO make function? */
 
+	memset(t->text, '\0', MAXWORDLEN); /* TODO explicit zero */
 	strncpy(t->text, s, i);
 	t->type = WORD;
 printf("word_token '%s'\n", t->text); /* TODO remove */
-	return i;
+	return s + i;
 }
 
-size_t
+char *
 char_token(struct token *t, char *s)
 {
 	t->type = s[0];
 	t->text[0] = s[0];
 	t->text[1] = '\0';
 printf("char_token '%c'\n", s[0]); /* TODO remove */
-	return 1;
+	return s + 2;
 }
 
-size_t
+char *
 get_token(struct token *t, char *s)
 {
 	for (; isspace(s[0]); s++)
 		;
 
 	if (!s[0])
-		return eot_token(t);
+		return eot_token(t, s);
 	else if (isdigit(s[0]))
 		return number_token(t, s);
 	else if (isalpha(s[0]))
@@ -123,7 +124,7 @@ void
 match(int expected, struct token *t, char *s)
 {
 	if (t->type == expected)
-		s += get_token(t, s);
+		s = get_token(t, s);
 	else
 		die("match: unexpected token '%s'\n", t->text);
 
@@ -174,7 +175,7 @@ parse(char *s)
 
 	t = ecalloc(1, sizeof(*t));
 	t->text = ecalloc(MAXWORDLEN + 1, sizeof(char));
-	s += get_token(t, s);
+	s = get_token(t, s);
 	return sequence(t, s); /* TODO */
 }
 
