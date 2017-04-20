@@ -123,7 +123,10 @@ copy_token(struct token *t)
 	struct token *new;
 
 	new = ecalloc(1, sizeof(*new));
-	memcpy(new, t, sizeof(*new));
+	new->text = ecalloc(MAXWORDLEN + 1, sizeof(char));
+
+	new->type = t->type;
+	strncpy(new->text, t->text, MAXWORDLEN);
 
 	return new;
 }
