@@ -189,6 +189,15 @@ parse(char *s)
 }
 
 void
+walk_tree(struct tree_node *ast)
+{
+	/* TODO parse entire tree */
+	execlp(ast->child[0]->t->text,
+	       ast->child[0]->t->text,
+	       (void *)0);
+}
+
+void
 execute(char *s)
 {
 	struct tree_node *ast; /* abstract syntax tree */
@@ -198,8 +207,7 @@ execute(char *s)
 		die("execute: fork failed\n");
 	case 0:
 		ast = parse(s);
-		execlp(s, s, (void *)0); /* TODO walk_tree(ast) */
-		(void)ast; /* TODO */
+		walk_tree(ast);
 		break;
 	default:
 		wait((void*)0);
