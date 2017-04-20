@@ -1,12 +1,18 @@
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "util.h"
 
 void
-die(char *msg)
+die(char *msg, ...)
 {
-	fprintf(stderr, msg);
+	va_list ap;
+
+	va_start(ap, msg);
+	vfprintf(stderr, msg, ap);
+	va_end(ap);
+
 	exit(EXIT_FAILURE);
 }
 
@@ -17,7 +23,7 @@ ecalloc(size_t nmemb, size_t size)
 
 	p = calloc(nmemb, size);
 	if (!p)
-		die("ecalloc: calloc failed");
+		die("ecalloc: calloc failed\n");
 
 	return p;
 }
