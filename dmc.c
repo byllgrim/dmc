@@ -44,20 +44,23 @@ get_input(struct line *l, size_t len)
 }
 
 void
-eot_token(struct token *t)
-{
-	t->type = EOT; /* TODO don't need a whole function */
-	/* t->text = (void *)0;*/ /* TODO free text? set [0]=0 */
-printf("eot_token\n"); /* TODO remove */
-}
-
-void
 number_token(struct token *t, struct line *l)
 {
-	(void)t; /* TODO */
-	(void)l; /* TODO */
+	size_t i;
+	char *s;
 
-printf("number_token TODO\n"); /* TODO remove */
+	s = l->s + l->pos;
+	for (i = 0; s[i] && isdigit(s[i]); i++)
+		;
+
+	strncpy(t->text, s, i);
+	t->text[i] = '\0';
+	t->type = NUMBER;
+	l->pos += i;
+
+	/* TODO function pointer and combine word_token? */
+
+printf("number_token '%s'\n", t->text); /* TODO atoi */
 }
 
 void
@@ -71,11 +74,12 @@ word_token(struct token *t, struct line *l)
 	for (i = 0; s[i] && !isspace(s[i]); i++)
 		; /* TODO make function? */
 
-	memset(t->text, '\0', MAXWORDLEN); /* TODO explicit zero */
 	strncpy(t->text, s, i);
+	t->text[i] = '\0'; /* memset(t->text, '\0', MAXWORDLEN); */
 	t->type = WORD;
 	l->pos += i;
 printf("word_token '%s'\n", t->text); /* TODO remove */
+	/* TODO what about "words in quotes"? */
 }
 
 void
@@ -102,11 +106,11 @@ get_token(struct token *t, struct line *l)
 	char c;
 
 	for (; isspace(l->s[l->pos]); l->pos++)
-		; /* TODO skip_spaces() */
+		;
 
 	c = l->s[l->pos];
 	if (!c)
-		eot_token(t);
+		t->type = EOT;
 	else if (isdigit(c))
 		number_token(t, l);
 	else if (valid_char(c))
