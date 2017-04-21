@@ -46,8 +46,8 @@ get_input(struct line *l, size_t len)
 void
 eot_token(struct token *t)
 {
-	t->type = EOT;
-	t->text = (void *)0; /* TODO free text? set [0]=0 */
+	t->type = EOT; /* TODO don't need a whole function */
+	/* t->text = (void *)0;*/ /* TODO free text? set [0]=0 */
 printf("eot_token\n"); /* TODO remove */
 }
 
@@ -90,7 +90,7 @@ printf("char_token '%s'\n", t->text); /* TODO remove */
 }
 
 int
-valid_char(char c)
+valid_char(char c) /* TODO valid_single()? */
 {
 	return c == '&' || c == '|' || c == '='
 	       || c == '[' || c == ']';
@@ -132,12 +132,16 @@ copy_token(struct token *t)
 void
 match(int expected, struct token *t, struct line *l)
 {
-	if (t->type == expected)
+	if (t->type == expected) {
+		printf("matched %s\n", t->text);
 		get_token(t, l);
-	else
-		die("match: unexpected token '%s'\n", t->text);
+	} else {
+		die("match: expected %d got %d '%s'\n",
+		    expected, t->type, t->text);
+	}
 
 	/* TODO the advancement of get_token is a side-effect */
+	/* TODO allow specifying error message? */
 }
 
 struct tree_node *
@@ -155,6 +159,28 @@ cmd_words(struct token *t, struct line *l)
 }
 
 struct tree_node *
+redirection(struct token *t, struct line *l)
+{
+	struct tree_node *n = ecalloc(1, sizeof(*n));
+
+	match('[', t, l);
+
+	n->t = copy_token(t);
+	match(NUMBER, t, l);
+
+	if (t->type == '=') {
+		match('=', t, l);
+
+		n->t = copy_token(t); /* TODO copy to new t */
+		match(NUMBER, t, l);
+	}
+
+	match(']', t, l);
+
+	return n;
+}
+
+struct tree_node *
 pipeto(struct token *t, struct line *l) /* pipe() clashes with unistd */
 {
 	struct tree_node *n = ecalloc(1, sizeof(*n));
@@ -162,7 +188,8 @@ pipeto(struct token *t, struct line *l) /* pipe() clashes with unistd */
 	n->t = copy_token(t);
 	match('|', t, l);
 
-	/* if (t->type == '[') */
+	if (t->type == '[')
+		n->child[0] = redirection(t, l);
 
 	return n;
 }
