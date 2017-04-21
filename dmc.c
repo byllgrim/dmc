@@ -37,7 +37,7 @@ void
 get_input(struct line *l, size_t len)
 {
 	l->s = fgets(l->s, len, stdin);
-	if (!(l->s)) /* TODO precedence */
+	if (!l->s)
 		die("get_input: fgets failed\n");
 
 	l->s[strlen(l->s) - 1] = '\0';
@@ -48,7 +48,7 @@ eot_token(struct token *t)
 {
 	t->type = EOT;
 	t->text = (void *)0; /* TODO free text? set [0]=0 */
-printf("eot_token\n");
+printf("eot_token\n"); /* TODO remove */
 }
 
 void
@@ -64,14 +64,15 @@ void
 word_token(struct token *t, struct line *l)
 {
 	size_t i;
-	/* TODO clear pointer for s */
+	char *s;
 
 	/* TODO | is allowed in word? */
-	for (i = 0; l->s[l->pos + i] && !isspace(l->s[l->pos + i]); i++)
+	s = l->s + l->pos;
+	for (i = 0; s[i] && !isspace(s[i]); i++)
 		; /* TODO make function? */
 
 	memset(t->text, '\0', MAXWORDLEN); /* TODO explicit zero */
-	strncpy(t->text, l->s + l->pos, i);
+	strncpy(t->text, s, i);
 	t->type = WORD;
 	l->pos += i;
 printf("word_token '%s'\n", t->text); /* TODO remove */
@@ -80,8 +81,9 @@ printf("word_token '%s'\n", t->text); /* TODO remove */
 void
 char_token(struct token *t, struct line *l)
 {
-	t->type = l->s[l->pos];
-	t->text[0] = l->s[l->pos];
+	char *s = l->s + l->pos;
+	t->type = s[0];
+	t->text[0] = s[0];
 	t->text[1] = '\0';
 	l->pos++;
 printf("char_token '%s'\n", t->text); /* TODO remove */
@@ -113,18 +115,6 @@ get_token(struct token *t, struct line *l)
 		word_token(t, l);
 }
 
-struct tree_node *
-new_node(void)
-{
-	struct tree_node *n;
-
-	n = ecalloc(1, sizeof(*n));
-	/* TODO does one alloc arrays in structs? */
-	/* TODO unnecessary function */
-
-	return n;
-}
-
 struct token *
 copy_token(struct token *t)
 {
@@ -153,7 +143,7 @@ match(int expected, struct token *t, struct line *l)
 struct tree_node *
 cmd_words(struct token *t, struct line *l)
 {
-	struct tree_node *n = new_node();
+	struct tree_node *n = ecalloc(1, sizeof(*n));
 
 	n->t = copy_token(t);
 	match(WORD, t, l);
@@ -167,7 +157,7 @@ cmd_words(struct token *t, struct line *l)
 struct tree_node *
 pipeto(struct token *t, struct line *l) /* pipe() clashes with unistd */
 {
-	struct tree_node *n = new_node();
+	struct tree_node *n = ecalloc(1, sizeof(*n));
 
 	n->t = copy_token(t);
 	match('|', t, l);
@@ -180,7 +170,7 @@ pipeto(struct token *t, struct line *l) /* pipe() clashes with unistd */
 struct tree_node *
 sequence(struct token *t, struct line *l)
 {
-	struct tree_node *n = new_node();
+	struct tree_node *n = ecalloc(1, sizeof(*n));
 
 	n->child[0] = cmd_words(t, l);
 
@@ -188,11 +178,11 @@ sequence(struct token *t, struct line *l)
 		n->t = copy_token(t); /* TODO asynchronous bg job */
 		match('&', t, l);
 	} else if (t->type == '|') {
-		n->child[1] = pipeto(t, l); /* TODO advance s */
+		n->child[1] = pipeto(t, l);
 		n->child[2] = sequence(t, l);
 	}
 
-	/* TODO check if s is exhausted */
+	/* TODO check if l is exhausted */
 	return n;
 }
 
@@ -229,7 +219,7 @@ execute(struct line *l)
 		walk_tree(ast);
 		break;
 	default:
-		wait((void*)0);
+		wait((void*)0); /* TODO specify child PID? */
 		/* TODO what about bg? */
 	}
 }
@@ -242,7 +232,7 @@ main(void)
 
 	/* TODO ignore interrupt signal etc */
 	l = ecalloc(BUFSIZ + 1, sizeof(*l));
-	l->s = ecalloc(BUFSIZ + 1, sizeof(*(l->s))); /* TODO pre */
+	l->s = ecalloc(BUFSIZ + 1, sizeof(*l->s));
 
 	for (;;) {
 		fputs(prompt, stdout);
