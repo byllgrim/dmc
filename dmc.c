@@ -26,6 +26,12 @@ struct tree_node {
 	struct tree_node *child[MAXCHILDREN];
 	struct token *t;
 };
+/* TODO killyourself. Your data structures and architecture suck */
+
+struct line { /* TODO input_line, sequence, statement? */
+	size_t pos;
+	char *s;
+};
 
 char *
 get_input(char *s, size_t len)
@@ -159,6 +165,19 @@ cmd_words(struct token *t, char *s)
 }
 
 struct tree_node *
+pipeto(struct token *t, char *s) /* 'pipe()' conflicts with unistd */
+{
+	struct tree_node *n = new_node();
+
+	n->t = copy_token(t);
+	s = match('|', t, s);
+
+	/* if (t->type == '[') */
+
+	return n;
+}
+
+struct tree_node *
 sequence(struct token *t, char *s)
 {
 	struct tree_node *n = new_node();
@@ -169,11 +188,8 @@ sequence(struct token *t, char *s)
 		n->t = copy_token(t); /* TODO asynchronous bg job */
 		s = match('&', t, s);
 	} else if (t->type == '|') {
-		/*
-		TODO
-		n->child[1] = pipe();
-		n->child[2] = sequence();
-		*/
+		n->child[1] = pipeto(t, s); /* TODO advance s */
+		n->child[2] = sequence(t, s);
 	}
 
 	/* TODO check if s is exhausted */
