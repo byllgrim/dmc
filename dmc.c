@@ -59,8 +59,6 @@ number_token(struct token *t, struct line *l)
 	l->pos += i;
 
 	/* TODO function pointer and combine word_token? */
-
-printf("number_token '%s'\n", t->text); /* TODO atoi */
 }
 
 void
@@ -78,7 +76,6 @@ word_token(struct token *t, struct line *l)
 	t->text[i] = '\0'; /* memset(t->text, '\0', MAXWORDLEN); */
 	t->type = WORD;
 	l->pos += i;
-printf("word_token '%s'\n", t->text); /* TODO remove */
 	/* TODO what about "words in quotes"? */
 }
 
@@ -90,7 +87,6 @@ char_token(struct token *t, struct line *l)
 	t->text[0] = s[0];
 	t->text[1] = '\0';
 	l->pos++;
-printf("char_token '%s'\n", t->text); /* TODO remove */
 }
 
 int
@@ -136,13 +132,11 @@ copy_token(struct token *t)
 void
 match(int expected, struct token *t, struct line *l)
 {
-	if (t->type == expected) {
-		printf("matched %s\n", t->text);
+	if (t->type == expected)
 		get_token(t, l);
-	} else {
+	else
 		die("match: expected %d got %d '%s'\n",
 		    expected, t->type, t->text);
-	}
 
 	/* TODO the advancement of get_token is a side-effect */
 	/* TODO allow specifying error message? */
